@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<title>Dashboard</title>
+</head>
+
+<body class="container mt-4">
+    <nav class="navbar navbar-expand-lg shadow-lg rounded-4 px-4 py-3 mb-4"
+style="background:linear-gradient(90deg,#4f46e5,#2563eb);">
+    <div class="container-fluid">
+        <span class="navbar-brand fs-3 fw-bold text-white">
+    🎬 Sohail Portfolio Admin
+</span>
+
+<div class="ms-auto">
+    <a href="/logout" class="btn btn-light rounded-pill px-4 fw-semibold">
+        🚪 Logout
+    </a>
+</div>
+    </div>
+</nav>
+
+<h1 class="display-5 fw-bold text-primary">
+    Welcome, Mohammad Sohail Khan 👋
+</h1>
+
+<p class="text-muted">
+    Manage your portfolio, videos, and client messages from one place.
+</p>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold">📊 Dashboard Overview</h3>
+</div>
+{% if request.args.get("deleted") %}
+<p style="color: green; font-weight: bold;">
+    ✅ Video deleted successfully!
+</p>
+{% endif %}
+<form method="GET" action="/dashboard" class="mb-4">
+    <div class="input-group input-group-lg shadow">
+        <input
+            type="text"
+            class="form-control"
+            name="search"
+            placeholder="🔍 Search videos..."
+            value="{{ request.args.get('search', '') }}"
+        >
+
+        <button class="btn btn-primary px-4" type="submit">
+            <i class="bi bi-search"></i> Search
+        </button>
+    </div>
+</form>
+
+<div class="row g-4 my-4">
+
+    <div class="row-md-6">
+<div class="card border-0 shadow-lg rounded-5 h-10"
+style="background:linear-gradient(135deg,#6366f1,#4338ca); color:white;">
+    <div class="card-body">
+        <h5 class="card-title" align="center">🎥 Total Videos</h5>
+        <h2 align="center">{{ total_videos }}</h2>
+    </div>
+</div>
+<br>
+    <div class="row-md-8">
+<div class="card border-0 shadow-lg rounded-5 h-10"
+style="background:linear-gradient(135deg,#06b6d4,#0891b2); color:white;">
+    <div class="card-body">
+        <h5 class="card-title" align="center">📩 Total Messages</h5>
+        <h2 align="center">{{ total_messages }}</h2>
+    </div>
+</div>
+</div>
+<br>
+<h2 class="fw-bold text-dark mb-4">
+    🎬 Uploaded Videos
+</h2>
+
+<div class="card text-center shadow-sm" style="width: 1310px;">
+    <div class="card-body">
+
+{% for video in videos %}
+<div class="card shadow-lg border-0 rounded-4">
+<div class="card-body">
+
+<div class="table-responsive">
+
+<table class="table table-hover align-middle mb-0">
+    <thead class="table-dark">
+<tr>
+    <th width="40%">Title</th>
+    <th width="35%">Preview</th>
+    <th width="25%">Actions</th>
+</tr>
+</thead>
+</tbody>
+<tbody>
+<tr>
+
+<td>{{ video[1] }}</td>
+
+<td>
+    <video width="180" controls>
+        <source src="{{ url_for('static', filename='uploads/' + video[2]) }}" type="video/mp4">
+    </video>
+</td>
+
+<td>
+    <a href="/edit/{{ video[0] }}">
+        <button class="btn btn-warning rounded-pill px-3">
+    ✏️ Edit
+</button>
+    </a>
+<br><br>
+    <a href="/delete/{{ video[0] }}">
+        <button class="btn btn-danger rounded-pill px-2">
+    🗑 Delete
+</button>
+    </a>
+</td>
+{% endfor %}
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div class="d-flex gap-2 my-3">
+
+    <a href="/upload">
+        <button class="btn btn-success" style="width: 630px">
+            + Upload New Reel
+        </button>
+    </a>
+<br>
+    <a href="/messages">
+        <button class="btn btn-info text-white" style="width: 630px">
+            📩 View Contact Messages
+        </button>
+    </a>
+
+</div>
+
+    <footer class="bg-dark text-white text-center py-3 mt-5 rounded">
+    <p class="mb-0">
+    © 2026 Mohammad Sohail Khan | Portfolio Admin Panel
+</p>
+</footer>
+
+</body>
+
+</html>

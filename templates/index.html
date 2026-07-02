@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mohammed Sohail Khan </title>
+    <link rel="icon" href="static\images\Sohail icon.png" type="image/png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<header>
+    <nav class="navbar">
+        <h2 class="logo">Mohammed Sohail Khan</h2>
+
+        <ul class="nav-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#portfolio">Portfolio</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+
+    </nav>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+
+    <div class="hero-left">
+
+        <p class="small-title">Professional Video Editor</p>
+
+        <h1>
+            Hello, I'm <span>Sohail Khan</span>
+        </h1>
+        <h2>2 Years+ Experience</h2>
+        <h3>
+            Cinematic Reels • Gaming Edits • Motion Graphics
+        </h3>
+
+        <p class="hero-text">
+            I create high-quality Instagram Reels, YouTube Shorts,
+            cinematic videos, gaming montages and engaging content
+            that grabs attention and helps creators grow.
+        </p>
+
+        <div class="buttons">
+
+            <a href="#portfolio" class="primary-btn">
+                View Portfolio
+            </a>
+
+            <a href="#contact" class="secondary-btn">
+                Contact Me
+            </a>
+
+        </div>
+        <br>
+
+<div class="social">
+
+<a href="https://www.instagram.com/sohail_so_nu?igsh=MWZpOTRlMHpya3QzbA=="><i class="fab fa-instagram"></i></a>
+
+<a href="https://wa.me/9740544835"><i class="fab fa-whatsapp"></i></a>
+
+</div>
+<br>
+
+    </div>
+
+    <div class="hero-right">
+
+        <img src="static\images\My Profile Pic.png"
+            alt="Profile">
+
+    </div>
+
+</section>
+
+<!-- ===== ABOUT ===== -->
+
+<section id="about" class="section">
+
+    <h2>About Me</h2>
+
+    <p>
+    I am a passionate and creative video editor dedicated to crafting visually stunning and engaging content. With a strong focus on cinematic storytelling, I specialize in editing Instagram Reels, YouTube Shorts, gaming videos, and motion graphics that capture attention and leave a lasting impact. I believe that every frame matters, so I pay close attention to detail, smooth transitions, color grading, and sound design to deliver high-quality results. My goal is to transform simple ideas into powerful visual stories that connect with audiences and enhance brand identity. I am constantly learning new techniques and trends to stay ahead in the creative field, ensuring that every project I work on is fresh, modern, and unique.
+    </p>
+
+</section>
+
+<!-- ===== SERVICES ===== -->
+
+<section id="services" class="section">
+
+<h2>Services</h2>
+
+<div class="cards">
+
+<div class="card">
+<i class="fa-brands fa-instagram"></i>
+<h3>Instagram Reels</h3>
+</div>
+
+<div class="card">
+<i class="fa-brands fa-youtube"></i>
+<h3>YouTube Videos</h3>
+</div>
+
+<div class="card">
+<i class="fa-solid fa-gamepad"></i>
+<h3>Gaming Edits</h3>
+</div>
+
+<div class="card">
+<i class="fa-solid fa-wand-magic-sparkles"></i>
+<h3>Motion Graphics</h3>
+</div>
+
+</div>
+
+</section>
+
+<!-- ===== PORTFOLIO ===== -->
+
+<!-- Portfolio -->
+<section id="portfolio" class="section">
+
+    <h2>Featured Projects</h2>
+    <p style="text-align:center;margin-bottom:40px;color:#ccc;">
+        Some of my recent editing work
+    </p>
+
+    <div class="cards">
+
+        <div class="card">
+            <video controls poster="{{ url_for('static', filename='images/thumb1.jpg') }}">
+                <source src="static\uploads\insta reel.mp4" type="video/mp4">
+            </video>
+
+            <h3>Instagram Reel</h3>
+            <p>Cinematic Travel Edit</p>
+        </div>
+
+        <div class="card">
+            <video controls poster="{{ url_for('static', filename='images/thumb2.jpg') }}">
+                <source src="static\uploads\Valorant game.mp4" type="video/mp4">
+            </video>
+
+            <h3>Gaming Montage</h3>
+            <p>Smooth Transition Edit</p>
+        </div>
+
+        <div class="card">
+            <video controls poster="{{ url_for('static', filename='images/thumb3.jpg') }}">
+                <source src="static\uploads\youtube short.mp4" type="video/mp4">
+            </video>
+
+            <h3>YouTube Short</h3>
+            <p>Fast-paced Content</p>
+        </div>
+
+    </div>
+
+</section>
+
+<h2 style="color: #6c63ff; text-align: center; font-size: 40px;">My Portfolio</h2>
+<br>
+
+{% for video in videos %}
+<h3 style="color: #6c63ff; text-align: center; font-size: 30px;">Project Title : {{ video[1] }}</h3>
+<br>
+<div>
+    <video width="350" controls>
+        <source src="{{ url_for('static', filename='uploads/' + video[2]) }}" type="video/mp4">
+    </video>
+    
+<br>
+
+</a>
+</div>
+<br>
+{% endfor %}
+
+<!-- ===== CONTACT ===== -->
+
+<section id="contact" class="section">
+
+<h2>Let's Work Together</h2>
+
+<form method="POST">
+
+<input type="text" name="name" placeholder="Your Name" required>
+
+<input type="email" name="email" placeholder="Your Email" required>
+
+<textarea name="message" placeholder="Tell me about your project" required></textarea>
+
+<button type="submit">
+Send Message
+</button>
+
+{% if success %}
+    <p style="color: lime; text-align:center; font-size:18px;">
+        ✅ Message sent successfully!
+    </p>
+{% endif %}
+
+</form>
+
+</section>
+
+<footer>
+
+<p>
+© 2026 Mohammad Sohail Khan | Video Editor
+</p>
+
+</footer>
+<button id="scrollBtn" onclick="scrollToTop()">⬆</button>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
