@@ -242,6 +242,10 @@ def reply(id):
 
     message = cursor.fetchone()
 
+    if not message:
+        conn.close()
+        return "Message not found", 404
+
     if request.method == "POST":
 
         reply_text = request.form["reply"]
@@ -264,11 +268,9 @@ Mohammad Sohail Khan
         mail.send(msg)
 
         conn.close()
-
         return redirect(url_for("messages"))
 
     conn.close()
-
     return render_template("reply.html", message=message)
 
 @app.route("/logout")
