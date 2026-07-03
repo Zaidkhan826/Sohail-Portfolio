@@ -4,14 +4,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import sqlite3
-import resend
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-
-resend.api_key = os.getenv("RESEND_API_KEY")
-
 
 app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
 
