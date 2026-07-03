@@ -9,7 +9,7 @@ app = Flask(__name__)
 load_dotenv()
 
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
-app.config["MAIL_PORT"] = 587
+app.config["MAIL_PORT"] = 465
 app.config["MAIL_USE_TLS"] = True
 app.config["MAIL_USE_SSL"] = False
 app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
@@ -267,7 +267,10 @@ Regards,
 Mohammad Sohail Khan
 """
 
-        mail.send(msg)
+        try:
+            mail.send(msg)
+        except Exception as e:
+            print("EMAIL ERROR:", e)
 
         conn.close()
         return redirect(url_for("messages"))
