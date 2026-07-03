@@ -250,26 +250,23 @@ def reply(id):
 
         reply_text = request.form["reply"]
 
-        try:
-            resend.Emails.send({
-                "from": "onboarding@resend.dev",
-                "to": message[1],
-                "subject": "Reply from Sohail Portfolio",
-                "html": f"""
-                    <p>Hello {message[0]},</p>
-                    <p>{reply_text}</p>
-                    <br>
-                    <p>Regards,<br>Mohammad Sohail Khan</p>
-                """
-            })
-        except Exception as e:
-            print("EMAIL ERROR:", e)
-
-        conn.close()
-        return redirect(url_for("messages"))
+    try:
+        resend.Emails.send({
+            "from": "onboarding@resend.dev",
+            "to": message[1],
+            "subject": "Reply from Sohail Portfolio",
+            "html": f"""
+                <p>Hello {message[0]},</p>
+                <p>{reply_text}</p>
+                <br>
+                <p>Regards,<br>Mohammad Sohail Khan</p>
+            """
+        })
+    except Exception as e:
+        print("EMAIL ERROR:", e)
 
     conn.close()
-    return render_template("reply.html", message=message)
+    return redirect(url_for("messages"))
 
 @app.route("/logout")
 def logout():
