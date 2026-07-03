@@ -250,10 +250,13 @@ def reply(id):
 
         reply_text = request.form["reply"]
 
-    print("Reply received:", reply_text)
+        print("Reply received:", reply_text)
+
+        conn.close()
+        return redirect(url_for("messages"))
 
     conn.close()
-    return redirect(url_for("messages"))
+    return render_template("reply.html", message=message)
 
 @app.route("/logout")
 def logout():
