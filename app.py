@@ -1,38 +1,28 @@
-import requests
 import os
+import sqlite3
+import requests
+from flask import Flask, render_template, request, redirect, url_for, session
+from werkzeug.utils import secure_filename
+from werkzeug.exceptions import RequestEntityTooLarge
 from dotenv import load_dotenv
 
 load_dotenv()
 
-import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, session
-from werkzeug.utils import secure_filename
-
 app = Flask(__name__)
 
-app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
+# ---------------- CONFIG ----------------
+app.secret_key = os.getenv("SECRET_KEY", "editorportfolio123")
 
 UPLOAD_FOLDER = "static/uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
-app.secret_key = os.getenv("SECRET_KEY", "editorportfolio123")
 
 ALLOWED_EXTENSIONS = {"mp4", "mov", "avi", "mkv", "webm"}
+
 def allowed_file(filename):
-    return (
-        "." in filename
-        and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-    )
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/send', methods=['POST'])
-def send():
-    name = request.form['name']
-    email = request.form['email']
-    message = request.form['message']
-
-    print(name, email, message)
-    return "Message sent successfully!"
-
+# ---------------- HOME ----------------
 @app.route("/", methods=["GET", "POST"])
 def home():
 
@@ -57,11 +47,11 @@ def home():
 
     cursor.execute("SELECT id, title, filename FROM videos")
     videos = cursor.fetchall()
-
     conn.close()
 
     return render_template("index.html", videos=videos, success=True)
 
+# ---------------- LOGIN ----------------
 @app.route("/sohail-admin-986", methods=["GET", "POST"])
 def login():
 
@@ -81,9 +71,10 @@ def login():
 
     return render_template("login.html")
 
-
+# ---------------- DASHBOARD ----------------
 @app.route("/dashboard", methods=["GET"])
 def dashboard():
+
     if "admin" not in session:
         return redirect(url_for("login"))
 
@@ -102,21 +93,20 @@ def dashboard():
 
     videos = cursor.fetchall()
 
-    total_videos = len(videos)
-
     cursor.execute("SELECT COUNT(*) FROM messages")
     total_messages = cursor.fetchone()[0]
 
     conn.close()
 
     return render_template(
-    "dashboard.html",
-    videos=videos,
-    total_videos=total_videos,
-    total_messages=total_messages,
-    search=search
-)
+        "dashboard.html",
+        videos=videos,
+        total_videos=len(videos),
+        total_messages=total_messages,
+        search=search
+    )
 
+# ---------------- UPLOAD ----------------
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
 
@@ -127,11 +117,9 @@ def upload():
 
         title = request.form["title"]
         video = request.files["video"]
-        
-        if not allowed_file(video.filename):
-            return "Only MP4, MOV, AVI, MKV, and WEBM files are allowed."
 
-        if video:
+        if video and allowed_file(video.filename):
+
             filename = secure_filename(video.filename)
             video.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
@@ -148,8 +136,11 @@ def upload():
 
             return "Video Uploaded Successfully!"
 
+        return "Invalid file type"
+
     return render_template("upload.html")
 
+# ---------------- DELETE VIDEO ----------------
 @app.route("/delete/<int:id>")
 def delete(id):
 
@@ -164,7 +155,6 @@ def delete(id):
 
     if video:
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], video[0])
-
         if os.path.exists(filepath):
             os.remove(filepath)
 
@@ -172,8 +162,9 @@ def delete(id):
     conn.commit()
     conn.close()
 
-    return redirect(url_for("dashboard", deleted="1"))
+    return redirect(url_for("dashboard"))
 
+# ---------------- EDIT ----------------
 @app.route("/edit/<int:id>", methods=["GET", "POST"])
 def edit(id):
 
@@ -184,6 +175,7 @@ def edit(id):
     cursor = conn.cursor()
 
     if request.method == "POST":
+
         title = request.form["title"]
 
         cursor.execute(
@@ -196,17 +188,14 @@ def edit(id):
 
         return redirect(url_for("dashboard"))
 
-    cursor.execute(
-        "SELECT title FROM videos WHERE id=?",
-        (id,)
-    )
-
+    cursor.execute("SELECT title FROM videos WHERE id=?", (id,))
     video = cursor.fetchone()
 
     conn.close()
 
     return render_template("edit.html", video=video)
 
+# ---------------- MESSAGES ----------------
 @app.route("/messages")
 def messages():
 
@@ -223,6 +212,7 @@ def messages():
 
     return render_template("messages.html", messages=messages)
 
+# ---------------- REPLY (SAFE + WORKING) ----------------
 @app.route("/reply/<int:id>", methods=["GET", "POST"])
 def reply(id):
 
@@ -247,7 +237,30 @@ def reply(id):
 
         reply_text = request.form["reply"]
 
-        print("Reply sent:", reply_text)
+        try:
+            response = requests.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {os.getenv('RESEND_API_KEY')}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "from": "onboarding@resend.dev",
+                    "to": message[1],
+                    "subject": "Reply from Sohail Portfolio",
+                    "html": f"""
+                        <p>Hello {message[0]},</p>
+                        <p>{reply_text}</p>
+                        <br>
+                        <p>Regards,<br>Sohail</p>
+                    """
+                }
+            )
+
+            print("EMAIL STATUS:", response.status_code, response.text)
+
+        except Exception as e:
+            print("EMAIL ERROR:", e)
 
         conn.close()
         return redirect(url_for("messages"))
@@ -255,17 +268,7 @@ def reply(id):
     conn.close()
     return render_template("reply.html", message=message)
 
-@app.route("/logout")
-def logout():
-    session.pop("admin", None)
-    return redirect(url_for("home"))
-
-from werkzeug.exceptions import RequestEntityTooLarge
-
-@app.errorhandler(RequestEntityTooLarge)
-def file_too_large(e):
-    return "❌ File is too large. Maximum allowed size is 100 MB.", 413
-
+# ---------------- DELETE MESSAGE ----------------
 @app.route("/delete_message/<int:id>")
 def delete_message(id):
 
@@ -282,5 +285,17 @@ def delete_message(id):
 
     return redirect(url_for("messages"))
 
+# ---------------- LOGOUT ----------------
+@app.route("/logout")
+def logout():
+    session.pop("admin", None)
+    return redirect(url_for("home"))
+
+# ---------------- ERROR HANDLER ----------------
+@app.errorhandler(RequestEntityTooLarge)
+def file_too_large(e):
+    return "❌ File is too large. Maximum allowed size is 100 MB.", 413
+
+# ---------------- RUN ----------------
 if __name__ == "__main__":
     app.run(debug=True)
