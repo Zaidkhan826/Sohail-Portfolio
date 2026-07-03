@@ -1,22 +1,20 @@
-import sqlite3
 import os
-from flask_mail import Mail, Message
 from dotenv import load_dotenv
-from werkzeug.utils import secure_filename
-from flask import Flask, render_template, request, redirect, url_for, session
 
-app = Flask(__name__)
 load_dotenv()
 
-app.config["MAIL_SERVER"] = "smtp.gmail.com"
-app.config["MAIL_PORT"] = 465
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USE_SSL"] = False
-app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
-app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+import sqlite3
+import resend
+from flask import Flask, render_template, request, redirect, url_for, session
+from werkzeug.utils import secure_filename
+
+app = Flask(__name__)
+
+resend.api_key = os.getenv("RESEND_API_KEY")
+
+
 app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
 
-mail = Mail(app)
 UPLOAD_FOLDER = "static/uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
@@ -252,23 +250,18 @@ def reply(id):
 
         reply_text = request.form["reply"]
 
-        msg = Message(
-            subject="Reply from Sohail Portfolio",
-            sender=app.config["MAIL_USERNAME"],
-            recipients=[message[1]]
-        )
-
-        msg.body = f"""
-Hello {message[0]},
-
-{reply_text}
-
-Regards,
-Mohammad Sohail Khan
-"""
-
         try:
-            mail.send(msg)
+            resend.Emails.send({
+                "from": "onboarding@resend.dev",
+                "to": message[1],
+                "subject": "Reply from Sohail Portfolio",
+                "html": f"""
+                    <p>Hello {message[0]},</p>
+                    <p>{reply_text}</p>
+                    <br>
+                    <p>Regards,<br>Mohammad Sohail Khan</p>
+                """
+            })
         except Exception as e:
             print("EMAIL ERROR:", e)
 
