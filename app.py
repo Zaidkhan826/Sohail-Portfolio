@@ -1,3 +1,4 @@
+import requests
 import os
 from dotenv import load_dotenv
 
@@ -244,15 +245,35 @@ def reply(id):
 
     if request.method == "POST":
 
-        reply_text = request.form["reply"]
+    reply_text = request.form["reply"]
 
-        print("Reply received:", reply_text)
+    try:
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {os.getenv('RESEND_API_KEY')}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "from": "onboarding@resend.dev",
+                "to": message[1],
+                "subject": "Reply from Sohail Portfolio",
+                "html": f"""
+                    <p>Hello {message[0]},</p>
+                    <p>{reply_text}</p>
+                    <br>
+                    <p>Regards,<br>Sohail</p>
+                """
+            }
+        )
 
-        conn.close()
-        return redirect(url_for("messages"))
+        print("EMAIL STATUS:", response.status_code)
+
+    except Exception as e:
+        print("EMAIL ERROR:", e)
 
     conn.close()
-    return render_template("reply.html", message=message)
+    return redirect(url_for("messages"))
 
 @app.route("/logout")
 def logout():
